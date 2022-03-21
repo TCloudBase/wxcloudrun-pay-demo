@@ -8,8 +8,8 @@
 - 按照[此指引](https://developers.weixin.qq.com/miniprogram/dev/wxcloudrun/src/guide/weixin/pay.html)将微信支付商户号授权给小程序，然后获得小程序绑定的子商户号。
 - 将子商户号写入 `/server/index.php` 第2行 `$mchid` 中。
 - 在「微信云托管控制台」云调用打开开放接口服务，参照[此指引](https://developers.weixin.qq.com/miniprogram/dev/wxcloudrun/src/guide/weixin/open.html)。
-- 将项目下 `/server` 文件部署到微信云托管中，具体可以参照[此指引](https://developers.weixin.qq.com/miniprogram/dev/wxcloudrun/src/quickstart/custom/)中的部署步骤。
-- 获取上一步部署的微信云托管服务名称，以及环境ID，填入 `/miniprogram/pages/index/index.js` 的154、158行。
+- 将项目下 `/server/pay` 文件部署到微信云托管中，服务名称为`pay`；具体可以参照[此指引](https://developers.weixin.qq.com/miniprogram/dev/wxcloudrun/src/quickstart/custom/)中的部署步骤。
+- 获取上一步部署的微信云托管服务名称，以及环境ID，填入 `/miniprogram/pages/index/index.js` 的154行。
 - 完成。
 
 ## 技术原理
@@ -21,6 +21,7 @@
 ## 注意事项
 - 本项目只是用于演示，所以接口直接对应支付事项，仅用于代码交流
 - 如果你要开发业务，请结合自身业务逻辑自行拼接订单业务
+- 如果你想更改服务名称，需要注意在 `/miniprogram/pages/index/index.js` 的158行、`/server/index.php` 的30、59行更改服务名称。
 
 ## 作者信息
 - zirali

@@ -1,13 +1,22 @@
 <?php
   $mchid = '';  // 将子商户ID填写到这里
   $head = getallheaders();
-  if(empty($head['x-wx-source'])){
+  $body = json_decode(file_get_contents('php://input'),true);
+  error_log('----request header----'.json_encode($head),0);
+  error_log('----request body----'.json_encode($body),0);
+  if(empty($head['x-wx-source'])&&empty($head['x-wx-local-debug'])){
     echo sprintf('非法途径');
     return 100;
   }
-  $body = json_decode(file_get_contents('php://input'),true);
   if($body==null || empty($body["payid"])) {
-    echo sprintf('没有收到订单ID');
+    if(empty($body["transactionId"])){
+      echo sprintf('没有收到订单ID');
+    } else {
+      echo json_encode(array(
+        'errcode' => 0,
+        'errmsg' => 'ok'
+      ));
+    }
   } else {
     $payid = $body["payid"];
     $url = null;
@@ -17,14 +26,15 @@
       $url = 'http://api.weixin.qq.com/_/pay/unifiedOrder';
       $param = array(
         'body' => !empty($body["paytext"]) ? $body["paytext"] : "测试微信支付",
-        'openid' => !empty($head['x-wx-openid']) ? $head['x-wx-openid'] : null,
+        'openid' => !empty($head['x-wx-openid']) ? $head['x-wx-openid'] : $head['X-WX-OPENID'],
         'out_trade_no' =>  '2021WERUN'.$payid,
-        'spbill_create_ip' =>  !empty($head['x-forwarded-for']) ? $head['x-forwarded-for'] : null,
+        'spbill_create_ip' =>  !empty($head['x-forwarded-for']) ? $head['x-forwarded-for'] : $head['X-Forwarded-For'],
         'env_id' => !empty($head['x-wx-env']) ? $head['x-wx-env'] : null,
         'sub_mch_id' =>  $mchid,
         'total_fee' =>  !empty($body["fee"]) ? $body["fee"] : 2,
         'callback_type' => 2,
         'container' => array(
+          'service' => 'pay',
           'path' => '/'
         )
       );
@@ -53,6 +63,7 @@
         'refund_desc' => !empty($body["refundtext"]) ? $body["refundtext"] : "测试退款",
         'callback_type' => 2,
         'container' => array(
+          'service' => 'pay',
           'path' => '/'
         )
       );
@@ -83,9 +94,19 @@
       ));
       $response = curl_exec($curl);
       curl_close($curl);
-      echo $response;
+      error_log('----pay url----'.$url);
+      error_log('----pay body----'.json_encode($param));
+      error_log('----pay result----'.$response);
+      if($response==null||$response==''){
+        echo '没有打开开放接口服务，请打开后重新部署此项目';
+      } else {
+        echo $response;
+      }
     } else {
-      echo sprintf('没有相关方法');
+      echo json_encode(array(
+        'errcode' => 0,
+        'errmsg' => 'ok'
+      ));
     }
   }
 ?>
